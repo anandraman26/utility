@@ -3,7 +3,6 @@ package com.nv.hclutility;
 import java.util.HashSet;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import com.nv.hclutility.thread.PingThread;
 import com.nv.hclutility.util.PropertyUtil;
@@ -27,11 +26,6 @@ public class HCLUtilityPing {
 
 	private HCLUtilityPing() {
 		sleepTime = PropertyUtil.getInstance().getValueForKey("ping.thread.sleepTime");
-	}
-
-	public static void main(String[] args) {
-		DOMConfigurator.configure("D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf\\log4j.xml");
-		HCLUtilityPing.getInstance().startThread();
 	}
 
 	public void startThread() {

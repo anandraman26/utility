@@ -1,7 +1,6 @@
 package com.nv.hclutility;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import com.nv.hclutility.thread.EmailThread;
 import com.nv.hclutility.util.PropertyUtil;
@@ -22,11 +21,6 @@ public class HCLUtilityEmail {
 	}
 
 	private HCLUtilityEmail() {
-	}
-
-	public static void main(String[] args) {
-		DOMConfigurator.configure("D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf\\log4j.xml");
-		HCLUtilityEmail.getInstance().startThread();
 	}
 
 	public void startThread() {

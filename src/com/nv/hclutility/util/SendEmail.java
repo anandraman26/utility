@@ -97,11 +97,11 @@ public class SendEmail extends Authenticator{
 			ex.printStackTrace();
 		}
 	}
-	private static String FILEPATH = PropertyUtil.getInstance()
-			.getValueForKey("FilePath");
 	
 	public void sendEmail(List<TraceResult> traceResults,String fileName) {
+		
 		try {
+			String FILEPATH = PropertyUtil.getInstance().getValueForKey("FilePath");
 			String[] aesName = PropertyUtil.getInstance().getValueForKey("email.aes.name").split(",");
 			String applicationName = "";
 			String destinationIp = "";

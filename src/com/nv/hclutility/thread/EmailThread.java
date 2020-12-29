@@ -36,13 +36,14 @@ public class EmailThread implements Runnable {
 	}
 
 	public EmailThread() {
-		sleepTime = PropertyUtil.getInstance().getValueForKey("email.thread.sleepTime");
+		
 	}
 
 	@Override
 	public void run() {
 		while(true) {
 			try {
+				sleepTime = PropertyUtil.getInstance().getValueForKey("email.thread.sleepTime");
 				LOGGER.info(PropertyFileConstants.EMAIL_THREAD+"Current Time is :"+Calendar.getInstance().getTime()+" and EMAIL Thread start after "+sleepTime+" milli second ");
 				Thread.sleep(Long.valueOf(sleepTime));
 				startEmailThread();
@@ -84,7 +85,6 @@ public class EmailThread implements Runnable {
 				break;
 			}
 			convertDBDataIntoPdf(rtoListPdf,fileName);
-			Thread.sleep(50000);
 			LOGGER.info(PropertyFileConstants.EMAIL_THREAD+"Sending Email.... ");
 			SendEmail.getInstance().sendEmail(traceResults,fileName);
 		} catch (Exception e) {

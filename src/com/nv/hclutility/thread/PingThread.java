@@ -57,18 +57,21 @@ public class PingThread implements Runnable {
 		BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		BufferedReader Error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 		String s = null;
-
+		boolean rtoFlag = true;
 		LOGGER.info(PropertyFileConstants.PING_THREAD+"Ping Command for the destination Ip is : " + destIpAddress);
 		while ((s = input.readLine()) != null) {
-			if (s.equalsIgnoreCase("Request timed out.")) {
+			if (s.equalsIgnoreCase("Request timed out.")&& rtoFlag) {
+				rtoFlag=false;
 				Timestamp rtoTime = new Timestamp(System.currentTimeMillis());
 				//System.out.println("Ping thread +" + rtoTime + ": Request timed out. for the destination  "+ destIpAddress);
 				LOGGER.warn(PropertyFileConstants.PING_THREAD+"\tRequest timed out. at time " + rtoTime + ":  for the destination ip "+ destIpAddress);
 				String sourceIpAddress=PropertyUtil.getInstance().getValueForKey("server.ip");
 				startTraceThread(sourceIpAddress,destIpAddress, rtoTime);
+			}else if(!(s.equalsIgnoreCase("Request timed out.") && rtoFlag)) {
+				rtoFlag=false;
 			}
 		}
-		LOGGER.info(PropertyFileConstants.PING_THREAD+"error (if any): Stoping Ping Thread By Task Manager/ Service stop ");
+		//LOGGER.info(PropertyFileConstants.PING_THREAD+"error (if any): Stoping Ping Thread By Task Manager/ Service stop ");
 		while ((s = Error.readLine()) != null) {
 			LOGGER.error(PropertyFileConstants.PING_THREAD+"error while ping " + s);
 		}
