@@ -18,12 +18,12 @@ public class PropertyUtil {
 	private static PropertyUtil thisInstance;
 	public static final int defaultValue = 5;
 	public static final int defaultMaxResultInDBValue = 50;
-	private static long lastTime;
+	private static long lastModifiedTime;
+	public static String fileName = "D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf" + File.separator
+			+ PROPERTY_FILE_NAME;
 
 	public static void refresh() {
 		try {
-			String fileName = "C:/NovelVox/nad-server/webapps/ROOT/WEB-INF/conf" + File.separator + PROPERTY_FILE_NAME;
-
 			if (null == fileName || fileName.isEmpty()) {
 				fileName = ISuiteContextListener.getConfFolderPath() + File.separator + PROPERTY_FILE_NAME;
 			}
@@ -32,20 +32,8 @@ public class PropertyUtil {
 				FileInputStream in = new FileInputStream(f);
 				propCommonUtility = new Properties();
 				propCommonUtility.load(in);
-				lastTime = f.lastModified();
-				File tmpFile = new File(fileName);
-				if (tmpFile.lastModified() > lastTime && lastTime > 0) {
-					FileInputStream inStream2 = null;
-					try {
-						inStream2 = new FileInputStream(tmpFile);
-						propCommonUtility.load(inStream2);
-						log.info("Propeties file loaded successfully");
-					} catch (Exception e) {
-						System.err.println("Unable to load properties file during change (" + tmpFile + ") : " + e);
-						log.error("Error loading properties file: " + e);
-					}
-					lastTime = tmpFile.lastModified();
-				}
+				lastModifiedTime = f.lastModified();
+				loadUpdatedFile();
 			} else {
 				log.error("Not able  to load Properties file : " + propCommonUtility);
 				log.error("property file not found");
@@ -59,9 +47,28 @@ public class PropertyUtil {
 		}
 	}
 
+	private static boolean loadUpdatedFile() {
+		boolean fileUpdate = false;
+		File tmpFile = new File(fileName);
+		if (tmpFile.lastModified() > lastModifiedTime && lastModifiedTime > 0) {
+			FileInputStream inStream2 = null;
+			try {
+				inStream2 = new FileInputStream(tmpFile);
+				propCommonUtility.load(inStream2);
+				log.info("Propeties file loaded successfully");
+				fileUpdate = true;
+			} catch (Exception e) {
+				fileUpdate = false;
+				log.error("Error loading properties file: " + e);
+			}
+			lastModifiedTime = tmpFile.lastModified();
+			log.info("Updated Properties file key:value is " + propCommonUtility.toString());
+		}
+		return fileUpdate;
+	}
+
 	public static PropertyUtil getInstance() {
 		if (thisInstance == null) {
-			refresh();
 			thisInstance = new PropertyUtil();
 		}
 		return thisInstance;
@@ -72,7 +79,9 @@ public class PropertyUtil {
 	}
 
 	public String getValueForKey(String key) {
-		refresh();
+		if (loadUpdatedFile()) {
+			refresh();
+		}
 		String p = propCommonUtility.getProperty(key);
 		return p;
 	}

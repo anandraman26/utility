@@ -27,7 +27,7 @@ public class HCLUtilityEmail {
 		String flag = PropertyUtil.getInstance().getValueForKey("hclutility.thread.flag");
 		if (flag.equals("true")) {
 			try {
-				new Thread(new EmailThread()).start();
+				new Thread(EmailThread.getInstance()).start();
 			} catch (Exception e) {
 				LOGGER.info("Exception in Email Thread ", e);
 			}

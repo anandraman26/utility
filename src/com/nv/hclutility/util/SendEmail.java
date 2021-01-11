@@ -1,6 +1,7 @@
 package com.nv.hclutility.util;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -22,6 +23,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 
 import com.nv.hclutility.db.DBUtility;
 import com.nv.hclutility.pojo.TraceResult;
@@ -42,9 +44,9 @@ public class SendEmail extends Authenticator{
 		    super();
 	}
 
-	public static void main(String[] args) {
-		getInstance().sendAttachment();
-	}
+//	public static void main(String[] args) {
+//		getInstance().sendAttachment();
+//	}
 
 	public void sendAttachment() {
 		String to = "anandraman.job@gmail.com";// change accordingly
@@ -98,10 +100,21 @@ public class SendEmail extends Authenticator{
 		}
 	}
 	
+	public static void main(String[] args) {
+		DOMConfigurator.configure("D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf\\log4j.xml");
+		TraceResult traceResults=new TraceResult();
+		traceResults.setApplicationName("Noida-AES");
+		traceResults.setDestIpAddress("ascensionprod.service-now.com");
+		traceResults.setSourceIpAddress("10.10.11.111");
+		List<TraceResult> traceResults2=new ArrayList<>();
+		traceResults2.add(traceResults);
+		SendEmail.getInstance().sendEmail(traceResults2,"D:/Generating_a_client_from_WSDL.pdf");
+	}
+	
 	public void sendEmail(List<TraceResult> traceResults,String fileName) {
 		
 		try {
-			String FILEPATH = PropertyUtil.getInstance().getValueForKey("FilePath");
+			//String FILEPATH = PropertyUtil.getInstance().getValueForKey("FilePath");
 			String[] aesName = PropertyUtil.getInstance().getValueForKey("email.aes.name").split(",");
 			String applicationName = "";
 			String destinationIp = "";
@@ -116,7 +129,7 @@ public class SendEmail extends Authenticator{
 			// 1) get the session object
 			Properties props = new Properties();
 			props.put("mail.smtp.auth", PropertyUtil.getInstance().getValueForKey("email.smtp.auth"));
-			props.put("mail.smtp.starttls.enable", PropertyUtil.getInstance().getValueForKey("email.smtp.starttls"));
+			props.put("mail.smtp.starttls.enable", PropertyUtil.getInstance().getValueForKey("email.smtp.starttls.enable"));
 			props.put("mail.smtp.host", PropertyUtil.getInstance().getValueForKey("email.smtp.host"));
 			props.put("mail.smtp.port", PropertyUtil.getInstance().getValueForKey("email.smtp.port"));
 
@@ -134,24 +147,21 @@ public class SendEmail extends Authenticator{
 				message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(PropertyUtil.getInstance().getValueForKey("email.to")));
 
 				if (Arrays.asList(aesName).contains(applicationName)) {
-					message.setSubject(PropertyUtil.getInstance().getValueForKey("email.subject.AES") + " from : "+ sourceIp + " to " + destinationIp);
+					message.setSubject(PropertyUtil.getInstance().getValueForKey("email.subject.AES").replace("#sourceIp#", sourceIp).replace("#applicationName#", applicationName));
 				} else {
-					message.setSubject(PropertyUtil.getInstance().getValueForKey("email.subject.SNOW") + " from : "+ sourceIp + " to " + destinationIp);
+					message.setSubject(PropertyUtil.getInstance().getValueForKey("email.subject.SNOW").replace("#sourceIp#", sourceIp).replace("#applicationName#", applicationName));
 				}
 				message.setText("Yo it has been sent");
-				String msg = PropertyUtil.getInstance().getValueForKey("email.message");
+				String msg = PropertyUtil.getInstance().getValueForKey("email.message").replace("#sourceIp#", sourceIp).replace("#applicationName#", applicationName).replace("#destinationIp#", destinationIp);
 
 				// 4) create new MimeBodyPart object and set DataHandler object to this object
-				MimeBodyPart messageBodyPart2 = new MimeBodyPart();
-				//String filename = "SendAttachment.java";// change accordingly
-				String file=FILEPATH+fileName;
-				DataSource source = new FileDataSource(file);
-				messageBodyPart2.setDataHandler(new DataHandler(source));
-				messageBodyPart2.setFileName(fileName);
-				
-				// 5) create Multipart object and add MimeBodyPart objects to this object
 				Multipart multipart = new MimeMultipart();
-				multipart.addBodyPart(messageBodyPart2);
+				MimeBodyPart messageBodyPart = new MimeBodyPart(); 
+
+				DataSource source = new FileDataSource(fileName);
+				messageBodyPart.setDataHandler(new DataHandler(source));
+				messageBodyPart.setFileName(fileName);
+				multipart.addBodyPart(messageBodyPart);
 				
 				// 6) set the multiplart object to the message object
 				message.setContent(multipart);
@@ -160,15 +170,15 @@ public class SendEmail extends Authenticator{
 				message.setContent(msg, "text/html");
 				
 				Transport.send(message);
-				delete(new File(file));
+				//delete(new File(file));
 				try {
-					DBUtility.getInstance().updateEmailStatus(traceResults,PropertyUtil.getInstance().getValueForKey("email.to"),"Yes");
+					//DBUtility.getInstance().updateEmailStatus(traceResults,PropertyUtil.getInstance().getValueForKey("email.to"),"Yes");
 				} catch (Exception e) {
 					LOGGER.error(PropertyFileConstants.EMAIL_THREAD+"Exception while updateing the email status ", e);
 				}
 			} catch (MessagingException ex) {
 				LOGGER.error(PropertyFileConstants.EMAIL_THREAD+"Exception in sending email ", ex);
-				DBUtility.getInstance().updateEmailStatus(traceResults,PropertyUtil.getInstance().getValueForKey("email.to"),"No");
+				//DBUtility.getInstance().updateEmailStatus(traceResults,PropertyUtil.getInstance().getValueForKey("email.to"),"No");
 			}
 		} catch (Exception e) {
 			LOGGER.error(PropertyFileConstants.EMAIL_THREAD+"Exception in sending email ", e);

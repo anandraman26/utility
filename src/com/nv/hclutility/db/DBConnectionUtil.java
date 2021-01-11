@@ -15,7 +15,7 @@ public class DBConnectionUtil {
 	private static Logger LOGGER = Logger.getLogger(DBConnectionUtil.class);
 	private static DBConnectionUtil thisInstance;
 
-	private ComboPooledDataSource cpdsObjDB;
+	private static ComboPooledDataSource cpdsObjDB = null;
 
 	public static final String CONECTION = "connection";
 
@@ -23,12 +23,7 @@ public class DBConnectionUtil {
 		makeComboPooledDataSourceObject();
 	}
 
-	public void refresh() {
-		makeComboPooledDataSourceObject();
-	}
-
 	private void makeComboPooledDataSourceObject() {
-
 		try {
 			cpdsObjDB = new ComboPooledDataSource();
 			cpdsObjDB.setDriverClass(PropertyUtil.getInstance().getValueForKey(PropertyFileConstants.DB_DRIVER));
@@ -37,24 +32,26 @@ public class DBConnectionUtil {
 			cpdsObjDB.setPassword(PropertyUtil.getInstance().getValueForKey(PropertyFileConstants.DB_PASSWORD));
 			cpdsObjDB.setMaxPoolSize(200);
 			cpdsObjDB.setMinPoolSize(10);
-			cpdsObjDB.setMaxIdleTime(3600);
-			cpdsObjDB.setCheckoutTimeout(3000);
+			cpdsObjDB.setMaxIdleTime(300000); // 5 Min
+			cpdsObjDB.setCheckoutTimeout(30000);// 30 sec
 			cpdsObjDB.setMaxStatements(100);
-			cpdsObjDB.setMaxConnectionAge(7200);
-			cpdsObjDB.setAcquireRetryAttempts(10);
-			cpdsObjDB.setAcquireRetryAttempts(0);
+			cpdsObjDB.setMaxConnectionAge(0);// not closing connection by force
+			cpdsObjDB.setAcquireRetryAttempts(2);
 			cpdsObjDB.setAcquireRetryDelay(1000);
 			cpdsObjDB.setPreferredTestQuery("SELECT 1");
 			LOGGER.info(cpdsObjDB);
 		} catch (Exception e) {
-
 			LOGGER.error("ERROR WHILE CONNECTION TO DATA SOURCE :", e);
 		}
 	}
 
 	public static DBConnectionUtil getInstance() {
 		if (thisInstance == null) {
-			thisInstance = new DBConnectionUtil();
+			synchronized (DBConnectionUtil.class) {
+				if (thisInstance == null) {
+					thisInstance = new DBConnectionUtil();
+				}
+			}
 		}
 		return thisInstance;
 	}
@@ -69,35 +66,41 @@ public class DBConnectionUtil {
 		Connection connection = null;
 		try {
 			connection = cpdsObjDB.getConnection();
-			return connection;
+			LOGGER.info("Connection is " + connection);
+			System.out.println(connection);
 		} catch (Throwable e) {
 			LOGGER.error("ERROR WHILE CONNECTION TO DATA SOURCE : " + (cpdsObjDB != null
 					? ("db_url = " + cpdsObjDB.getJdbcUrl() + " db_userName = " + cpdsObjDB.getUser())
 					: ""), e);
-			return connection;
 		}
-	}
-	
-	public void closeTheConnection(Connection con,PreparedStatement pst,ResultSet resultSet) {
-		try
-		{
-		  if(con!=null)
-		  {
-			  con.close();
-		  }
-		  if(pst !=null)
-		  {
-			  pst.close();
-		  }if(resultSet !=null)
-		  {
-			  resultSet.close();
-		  }
-			
-		}catch(Exception e)
-		{
-			LOGGER.error("error in closeTheConnection while closing resources connections  ");
-		}
+		return connection;
 	}
 
+	public void closeTheConnection(Connection con, PreparedStatement pst, ResultSet resultSet) {
+		if (pst != null) {
+			try {
+				pst.close();
+			} catch (Exception e) {
+				LOGGER.error("error in closeTheConnection while closing resources connections  ");
+			}
+		}
+
+		if (con != null) {
+			try {
+				con.close();
+			} catch (Exception e) {
+				LOGGER.error("error in closeTheConnection while closing resources connections  ");
+			}
+		}
+
+		if (resultSet != null) {
+			try {
+				resultSet.close();
+			} catch (Exception e) {
+				LOGGER.error("error in closeTheConnection while closing resources connections  ");
+			}
+
+		}
+	}
 
 }

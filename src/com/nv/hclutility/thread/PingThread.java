@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
@@ -46,7 +45,6 @@ public class PingThread implements Runnable {
 			LOGGER.error(PropertyFileConstants.PING_THREAD+"Exception ",e); 
 		}
 	}
-	public static HashSet<String> snowAPI = new HashSet<>();
 	
 	private static void pingCommands(ArrayList<String> commandList, String destIpAddress) throws Exception {
 		// creating the sub process, execute system command
@@ -67,8 +65,8 @@ public class PingThread implements Runnable {
 				LOGGER.warn(PropertyFileConstants.PING_THREAD+"\tRequest timed out. at time " + rtoTime + ":  for the destination ip "+ destIpAddress);
 				String sourceIpAddress=PropertyUtil.getInstance().getValueForKey("server.ip");
 				startTraceThread(sourceIpAddress,destIpAddress, rtoTime);
-			}else if(!(s.equalsIgnoreCase("Request timed out.") && rtoFlag)) {
-				rtoFlag=false;
+			}else {
+				rtoFlag=true;
 			}
 		}
 		//LOGGER.info(PropertyFileConstants.PING_THREAD+"error (if any): Stoping Ping Thread By Task Manager/ Service stop ");
