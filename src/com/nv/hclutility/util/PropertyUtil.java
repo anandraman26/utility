@@ -69,6 +69,7 @@ public class PropertyUtil {
 
 	public static PropertyUtil getInstance() {
 		if (thisInstance == null) {
+			refresh();
 			thisInstance = new PropertyUtil();
 		}
 		return thisInstance;

@@ -25,7 +25,6 @@ import javax.mail.internet.MimeMultipart;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 
-import com.nv.hclutility.db.DBUtility;
 import com.nv.hclutility.pojo.TraceResult;
 
 public class SendEmail extends Authenticator{
@@ -108,7 +107,7 @@ public class SendEmail extends Authenticator{
 		traceResults.setSourceIpAddress("10.10.11.111");
 		List<TraceResult> traceResults2=new ArrayList<>();
 		traceResults2.add(traceResults);
-		SendEmail.getInstance().sendEmail(traceResults2,"D:/Generating_a_client_from_WSDL.pdf");
+		SendEmail.getInstance().sendEmail(traceResults2,"D:\\Generating_a_client_from_WSDL.pdf");
 	}
 	
 	public void sendEmail(List<TraceResult> traceResults,String fileName) {
@@ -157,7 +156,7 @@ public class SendEmail extends Authenticator{
 				// 4) create new MimeBodyPart object and set DataHandler object to this object
 				Multipart multipart = new MimeMultipart();
 				MimeBodyPart messageBodyPart = new MimeBodyPart(); 
-
+				LOGGER.info(fileName);
 				DataSource source = new FileDataSource(fileName);
 				messageBodyPart.setDataHandler(new DataHandler(source));
 				messageBodyPart.setFileName(fileName);
