@@ -24,7 +24,7 @@ public class DBConnectionUtil {
 	}
 
 	private void makeComboPooledDataSourceObject() {
-		try {
+		try {   
 			cpdsObjDB = new ComboPooledDataSource();
 			cpdsObjDB.setDriverClass(PropertyUtil.getInstance().getValueForKey(PropertyFileConstants.DB_DRIVER));
 			cpdsObjDB.setJdbcUrl(PropertyUtil.getInstance().getValueForKey(PropertyFileConstants.DB_URL));
