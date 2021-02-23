@@ -58,4 +58,15 @@ public class HCLUtilityContextListener implements ServletContextListener {
 		}
 	}
 
+	// public static void main(String[] args) {
+	// LOGGER.info("HCLUtility: Thread Started");
+	// try {
+	// init();
+	// HCLUtilityPing.getInstance().startThread();
+	// HCLUtilityEmail.getInstance().startThread();
+	// } catch (Exception e) {
+	// LOGGER.error("Exception while starting thread ", e);
+	// }
+	// }
+
 }

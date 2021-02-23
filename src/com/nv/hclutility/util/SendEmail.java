@@ -10,7 +10,6 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.Authenticator;
-import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -39,81 +38,13 @@ public class SendEmail extends Authenticator{
 	}
 
 	private SendEmail() {
-
 		    super();
 	}
 
-//	public static void main(String[] args) {
-//		getInstance().sendAttachment();
-//	}
-
-	public void sendAttachment() {
-		String to = "anandraman.job@gmail.com";// change accordingly
-		final String user = "";// change accordingly
-		final String password = "";// change accordingly
-
-		// 1) get the session object
-		 Properties properties = new Properties();
-         properties.put("mail.smtp.host", "smtp.gmail.com");
-         properties.put("mail.smtp.port", "587");
-         properties.put("mail.smtp.auth", "true");
-         properties.put("mail.smtp.starttls.enable", "true");
-		Session session = Session.getDefaultInstance(properties, new javax.mail.Authenticator() {
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(user, password);
-			}
-		});
-
-		// 2) compose message
-		try {
-			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(user));
-			message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
-			message.setSubject("Message Aleart");
-
-			// 3) create MimeBodyPart object and set your message text
-			BodyPart messageBodyPart1 = new MimeBodyPart();
-			messageBodyPart1.setText("This is message body");
-
-			// 4) create new MimeBodyPart object and set DataHandler object to this object
-			MimeBodyPart messageBodyPart2 = new MimeBodyPart();
-			String filename = "SendAttachment.java";// change accordingly
-			DataSource source = new FileDataSource(filename);
-			messageBodyPart2.setDataHandler(new DataHandler(source));
-			messageBodyPart2.setFileName(filename);
-
-			// 5) create Multipart object and add MimeBodyPart objects to this object
-			Multipart multipart = new MimeMultipart();
-			multipart.addBodyPart(messageBodyPart1);
-			multipart.addBodyPart(messageBodyPart2);
-
-			// 6) set the multiplart object to the message object
-			message.setContent(multipart);
-
-			// 7) send message
-			Transport.send(message);
-			System.out.println("message sent....");
-
-		} catch (MessagingException ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-	public static void main(String[] args) {
-		DOMConfigurator.configure("D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf\\log4j.xml");
-		TraceResult traceResults=new TraceResult();
-		traceResults.setApplicationName("Noida-AES");
-		traceResults.setDestIpAddress("ascensionprod.service-now.com");
-		traceResults.setSourceIpAddress("10.10.11.111");
-		List<TraceResult> traceResults2=new ArrayList<>();
-		traceResults2.add(traceResults);
-		SendEmail.getInstance().sendEmail(traceResults2,"D:\\Generating_a_client_from_WSDL.pdf");
-	}
-	
 	public void sendEmail(List<TraceResult> traceResults,String fileName) {
 		
 		try {
-			//String FILEPATH = PropertyUtil.getInstance().getValueForKey("FilePath");
+			String FILEPATH = PropertyUtil.getInstance().getValueForKey("FilePath");
 			String[] aesName = PropertyUtil.getInstance().getValueForKey("email.aes.name").split(",");
 			String applicationName = "";
 			String destinationIp = "";
@@ -157,6 +88,8 @@ public class SendEmail extends Authenticator{
 				Multipart multipart = new MimeMultipart();
 				MimeBodyPart messageBodyPart = new MimeBodyPart(); 
 				LOGGER.info(fileName);
+				String file=FILEPATH+fileName;
+				LOGGER.info(file);
 				DataSource source = new FileDataSource(fileName);
 				messageBodyPart.setDataHandler(new DataHandler(source));
 				messageBodyPart.setFileName(fileName);
@@ -194,5 +127,16 @@ public class SendEmail extends Authenticator{
 			LOGGER.info(PropertyFileConstants.EMAIL_THREAD+"existing file on server does not exist\t"+file);
 		}
 
+	}
+	
+	public static void main(String[] args) {
+		DOMConfigurator.configure("D:\\Anand Raman\\Novelvox WorkSpace\\HCL\\HCLUtility\\conf\\log4j.xml");
+		TraceResult traceResults=new TraceResult();
+		traceResults.setApplicationName("Noida-AES");
+		traceResults.setDestIpAddress("ascensionprod.service-now.com");
+		traceResults.setSourceIpAddress("10.10.11.111");
+		List<TraceResult> traceResults2=new ArrayList<>();
+		traceResults2.add(traceResults);
+		SendEmail.getInstance().sendEmail(traceResults2,"D:/Generating_a_client_from_WSDL.pdf");
 	}
 }
